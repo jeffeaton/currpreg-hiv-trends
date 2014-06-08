@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/Documents/Research/ANC : Population trends/Paper/draft 2/")
+setwd("./")
 
 ####################
 ####  DHS data  ####
@@ -584,7 +584,7 @@ dev.off()
 ####################
 
 library(adegenet)
-country.codes <- c("BF", "CM", "CI", "SN", "ET", "KE", "RW", "TZ", "LS", "MW", "SA", "SZ", "ZW")
+country.codes <- c("BF", "CM", "CI", "SN", "ET", "KE", "RW", "TZ", "LS", "MW", "ZA", "SZ", "ZW")
 
 fem.prev.country.survyear <- svyby(~hivres, by=~country+survyear, femdes, svyciprop, vartype=c("se", "ci"), na.rm=TRUE)
 preg.prev.country.survyear <- svyby(~hivres, by=~country+survyear, pregdes, svyciprop, vartype=c("se", "ci"), na.rm=TRUE)
@@ -638,13 +638,11 @@ fig2c <- data.frame(area=names(ageadj.preg.prev.change[!names(ageadj.preg.prev.c
                     preg=c(fig2b$preg[c(1:11,13)], preg.prev.change.exclsz),
                     ageadj.preg=(ageadj.preg.prev[,"per2"]/ageadj.preg.prev[,"per1"] - 1)[-12])
 
-quartz(w=6.8, h=5.5, pointsize=8)
+quartz(w=6.8, h=5.6, pointsize=8)
 
 par(oma=c(1.0, 1.5, 1, 0))
 layout(cbind(rbind(1:3, 1:3, 4:6, 4:6, 7:9, 7:9, 10:12, 10:12, c(13, 14, 14), c(13, 14, 14)), 0, rep(15:16, each=5)), w=c(1, 1, 1, 0.2, 2.2))
 par(mar=c(0.5, 1, 0.5, 0.5), cex=1, tcl=-0.25, mgp=c(2, 0.5, 0), cex.axis=0.9, las=1)
-## layout.show(16)
-##
 for(country in levels(pooldat$country)){
   dat <- fig2.list[[country]]
   if(country %in% c("Botswana")){
@@ -653,6 +651,7 @@ for(country in levels(pooldat$country)){
     matplot(dat$year, 100*dat[,c("hivres.fem", "hivres.preg")], type="l", lwd=2, col=c(col.fem, col.preg), lty=1,
             xlim=c(2002, 2012), ylim=c(0, 100*1.2*max(c(dat$ci_u.preg, dat$ci_u.fem))),
             ylab="", xaxt="n", xlab="")
+    matpoints(dat$year, 100*dat[,c("hivres.fem", "hivres.preg")], pch=20, lwd=1, col=c(col.fem, col.preg))
     polygon(c(dat$year, rev(dat$year)), 100*c(dat$ci_l.fem, rev(dat$ci_u.fem)), col=transp(col.fem, 0.2), border=NA)
     polygon(c(dat$year, rev(dat$year)), 100*c(dat$ci_l.preg, rev(dat$ci_u.preg)), col=transp(col.preg, 0.2), border=NA)
   }
@@ -675,10 +674,10 @@ abline(0, 1, col="grey")
 abline(h=0, v=0, lty=2, col="grey")
 text(100*fig2b$fem[1:13], 100*fig2b$preg[1:13], country.codes, cex=0.7, font=2, col="darkred")
 points(100*fig2b$fem[14:17], 100*fig2b$preg[14:17], pch=1:4, lwd=1.5, cex=1.2)
-axis(1, -7:3*10, c("-70%", NA, "-50%", NA, "-30%", NA, "-10%", NA, "10%", NA, "30%"))
-axis(2, -7:3*10, c("-70%", NA, "-50%", NA, "-30%", NA, "-10%", NA, "10%", NA, "30%"))
+axis(1, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
+axis(2, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
 mtext("Pregnant women: relative prev. change", 2, 2.5, las=3)
-legend("topleft", c("Western", "Eastern", "Southern", "All"), pch=1:4, lwd=1.5, pt.cex=1.2, lty=0, cex=0.95)
+legend("topleft", c("Western", "Eastern", "Southern", "All"), pch=1:4, lwd=1.5, pt.cex=1.2, lty=0, cex=0.9)
 mtext("B", 3, 0.7, font=2, cex=1.5, adj=-0.25)
 ####  Panel C  ####
 plot(100*fig2c$fem[1:12], 100*fig2c$ageadj.preg[1:12], type="n", ylim=c(-70, 30), xlim=c(-70, 30),
@@ -687,14 +686,14 @@ plot(100*fig2c$fem[1:12], 100*fig2c$ageadj.preg[1:12], type="n", ylim=c(-70, 30)
      xaxt="n", yaxt="n")
 abline(0, 1, col="grey")
 abline(h=0, v=0, lty=2, col="grey")
-text(100*fig2c$fem[1:12], 100*fig2c$preg[1:12], fig2c$code[1:12], cex=0.6, font=1, col=transp("darkred", 0.3))
-points(100*fig2c$fem[13:16], 100*fig2c$preg[13:16], pch=1:4, lwd=1, cex=1.2, col=transp(1, 0.3))
+## text(100*fig2c$fem[1:12], 100*fig2c$preg[1:12], fig2c$code[1:12], cex=0.6, font=1, col=transp("darkred", 0.3))
+## points(100*fig2c$fem[13:16], 100*fig2c$preg[13:16], pch=1:4, lwd=1, cex=1.2, col=transp(1, 0.3))
 text(100*fig2c$fem[1:12], 100*fig2c$ageadj.preg[1:12], fig2c$code[1:12], cex=0.7, font=2, col="darkred")
 points(100*fig2c$fem[13:16], 100*fig2c$ageadj.preg[13:16], pch=1:4, lwd=1.5, cex=1.2, col=1)
-axis(1, -7:3*10, c("-70%", NA, "-50%", NA, "-30%", NA, "-10%", NA, "10%", NA, "30%"))
-axis(2, -7:3*10, c("-70%", NA, "-50%", NA, "-30%", NA, "-10%", NA, "10%", NA, "30%"))
+axis(1, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
+axis(2, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
 mtext("Preg. women: age-adjusted rel. prev. change", 2, 2.5, las=3)
-legend("topleft", c("Western", "Eastern", "Southern", "All"), pch=1:4, lwd=1.5, pt.cex=1.2, lty=0, cex=0.95)
+legend("topleft", c("Western", "Eastern", "Southern", "All"), pch=1:4, lwd=1.5, pt.cex=1.2, lty=0, cex=0.9)
 mtext("C", 3, 1.0, font=2, cex=1.5, adj=-0.25)
 
 
@@ -767,11 +766,6 @@ axis(1, 1:2, c("Per. 1", "Per. 2"), lwd.ticks=NA)
 mtext("HIV prevalence (%)", 2, 0.4, las=3, cex=1.1, outer=TRUE)
 
 dev.off()
-
-
-####################
-####  Table S2  ####
-####################
 
 
 #############################
