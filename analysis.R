@@ -41,9 +41,9 @@ tz04$period <- NA
 
 library(foreign)
 
-sa05 <- read.dta("../../South Africa data/ANC vs population prevalence2005.dta")
-sa08 <- read.dta("../../South Africa data/ANC vs population prevalence2008.dta")
-sa12 <- read.dta("../../South Africa data/ANC vs population prevalence2012.dta")
+sa05 <- read.dta("~/Documents/Data/South Africa/HSRC surveys/currpreg-hiv-trends/ANC vs population prevalence2005.dta")
+sa08 <- read.dta("~/Documents/Data/South Africa/HSRC surveys/currpreg-hiv-trends/ANC vs population prevalence2008.dta")
+sa12 <- read.dta("~/Documents/Data/South Africa/HSRC surveys/currpreg-hiv-trends/ANC vs population prevalence2012.dta")
 
 sa05$country <- "South Africa"
 sa08$country <- "South Africa"
@@ -77,9 +77,9 @@ sa05$age <- floor(sa05$age)
 sa08$age <- floor(sa08$age)
 sa12$age <- floor(sa12$age)
 
-sa05$agegroup <- cut(sa05$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), incl=TRUE)
-sa08$agegroup <- cut(sa08$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), incl=TRUE)
-sa12$agegroup <- cut(sa12$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), incl=TRUE)
+sa05$agegroup <- cut(sa05$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE)
+sa08$agegroup <- cut(sa08$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE)
+sa12$agegroup <- cut(sa12$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE)
 
 sa05$currpreg <- factor(sa05$currpreg, c("No or unsure", "Yes"), c("no or unsure", "yes"))
 sa08$currpreg <- factor(sa08$currpreg, c("No or unsure", "Yes"), c("no or unsure", "yes"))
@@ -108,29 +108,25 @@ sa12$pophivweight <- sa12$hivweight*14095144/sum(sa12$hivweight)
 ##########################
 
 sz07 <- subset(sz07, age %in% 18:49)   # restrict to 18-49 to be comparable with SHIMS
-sz07$age <- NA                         # omit from age-specific analyses
-sz07$agegroup <- NA
 
-## from Bicego et al. PLOS ONE 2013
-## N = 9533
-## DEFF = 1.2
-## fraction currently pregnant = 0.07
-## HIV prevalence among currently pregnant = 0.379
-## HIV prevalence among not currently pregnant = 0.388
-
-sz11 <- setNames(data.frame(matrix(NA, 9533/1.2, length(sz07))), names(sz07))
-sz11$country <- "Swaziland"
-sz11$region <- "Southern"
-sz11$survyear <- "2011"
-sz11$period <- "per2"
-sz11$psu <- 1:nrow(sz11)
-sz11$stratum <- "s1"
-sz11$pophivweight <- sum(sz07$pophivweight)/nrow(sz11)
-sz11$sex <- "female"
-sz11$age <- NA
-sz11$agegroup <- NA
-sz11$hivres <- rep(c(1, 0, 1, 0), times=round(c(0.07*0.379, 0.07*(1-0.379), 0.93*0.388, 0.93*(1-0.388))*9533/1.2) - c(0, 0, 0, 1))
-sz11$currpreg <- rep(c("yes", "no or unsure"), round(c(0.07, 0.93)*9533/1.2))
+## SZ 2011 from SHIMS survey (18-49 only)
+sz11 <- read.csv("~/Documents/Data/Swaziland/SHIMS/Eaton_DURDC_request_12June2014.csv")
+sz11 <- with(sz11, data.frame(cluster        = shimsea,
+                               household      = uhhid,
+                               line           = NA,
+                               country        = "Swaziland",
+                               region         = "Southern",
+                               survyear       = "2011",
+                               period         = "per2",
+                               psu            = shimsea,
+                               stratum        = factor(paste(urban, region)),
+                               sex            = factor(gender, c("Male", "Female"), c("male", "female")),
+                               age            = age,
+                               agegroup       = cut(age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE),
+                               currpreg       = factor(preg, c("No", "Yes"), c("no or unsure", "yes")),
+                               hivres         = hivstatust1 == "Pos",
+                               hivweight      = wtcohort,
+                               pophivweight   = sum(sz07$pophivweight)*wtcohort/sum(wtcohort)))
 
 
 ##############################
@@ -341,7 +337,7 @@ save(frac.preg.country, frac.preg.region, frac.preg.all, frac.preg,
      fem.ageprev.country, preg.ageprev.country, fem.ageprev.region, preg.ageprev.region, fem.ageprev.all, preg.ageprev.all, fem.ageprev, preg.ageprev,
      fem.agedist.country, preg.agedist.country, fem.agedist.region, preg.agedist.region, fem.agedist.all, preg.agedist.all, fem.agedist, preg.agedist,
      preg.byage, fem.byage, prev.byage, ageadj.preg.prev, ageadj.preg.prev.var, ageadj.preg.prev.change, ageadj.preg.prev.change.var,
-     file="workspace_2014-05-31.RData")
+     file="workspace_2014-06-14.RData")
 
 ### linear models  ###
 mod.western.rr <- svyglm(hivres~country+currpreg*period, subset(femdes, region=="Western"), family=binomial(log))
@@ -608,35 +604,13 @@ fig2.dat[1,-(1:2)] <- c(0.177, NA, 0.153, 0.203, 0.275, NA, 0.147, 0.454, 2002)
 fig2.list <- split(fig2.dat, fig2.dat$country)
 
 
-## panel B
+## panels B & C
 
-fig2b <- data.frame(code=c(country.codes, rep(NA, 4)),
+fig2bc <- data.frame(code=c(country.codes, rep(NA, 4)),
                     fem=subset(fem.prev, period=="per2")$hivres/subset(fem.prev, period=="per1")$hivres - 1,
-                    preg=subset(preg.prev, period=="per2")$hivres/subset(preg.prev, period=="per1")$hivres - 1)
+                    preg=subset(preg.prev, period=="per2")$hivres/subset(preg.prev, period=="per1")$hivres - 1,
+                    ageadj.preg=(ageadj.preg.prev[,"per2"]/ageadj.preg.prev[,"per1"] - 1))
 
-## panel C
-
-fem.prev.region.exclsz <- svyby(~hivres, ~region+period, subset(femdes, country != "Swaziland"), svyciprop, vartype=c("ci", "var", "se"))
-fem.prev.all.exclsz <- svyby(~hivres, ~period, subset(femdes, country != "Swaziland"), svyciprop, vartype=c("ci", "var", "se"))
-fem.prev.exclsz <- rbind(setNames(fem.prev.region.exclsz, c("area", "period", "hivres", "se", "ci_l", "ci_u", "var")),
-                         setNames(cbind("All", fem.prev.all.exclsz), c("area", "period", "hivres", "se", "ci_l", "ci_u", "var")))
-
-preg.prev.region.exclsz <- svyby(~hivres, ~region+period, subset(pregdes, country != "Swaziland"), svyciprop, vartype=c("ci", "var", "se"))
-preg.prev.all.exclsz <- svyby(~hivres, ~period, subset(pregdes, country != "Swaziland"), svyciprop, vartype=c("ci", "var", "se"))
-preg.prev.exclsz <- rbind(setNames(preg.prev.region.exclsz, c("area", "period", "hivres", "se", "ci_l", "ci_u", "var")),
-                         setNames(cbind("All", preg.prev.all.exclsz), c("area", "period", "hivres", "se", "ci_l", "ci_u", "var")))
-
-fem.prev.change.exclsz <- subset(fem.prev.exclsz, period=="per2")$hivres/subset(fem.prev.exclsz, period=="per1")$hivres - 1
-preg.prev.change.exclsz <- subset(preg.prev.exclsz, period=="per2")$hivres/subset(preg.prev.exclsz, period=="per1")$hivres - 1
-
-## fem.prev.change.var.exclsz <- subset(fem.prev.exclsz, period=="per2")$var + subset(fem.prev.exclsz, period=="per1")$var
-## preg.prev.change.var.exclsz <- subset(preg.prev.exclsz, period=="per2")$var + subset(preg.prev.exclsz, period=="per1")$var
-
-fig2c <- data.frame(area=names(ageadj.preg.prev.change[!names(ageadj.preg.prev.change) %in% c("Swaziland", "Botswana")]),
-                    code=c(country.codes[-12], rep(NA, 4)),
-                    fem=c(fig2b$fem[c(1:11,13)], fem.prev.change.exclsz),
-                    preg=c(fig2b$preg[c(1:11,13)], preg.prev.change.exclsz),
-                    ageadj.preg=(ageadj.preg.prev[,"per2"]/ageadj.preg.prev[,"per1"] - 1)[-12])
 
 quartz(w=6.8, h=5.6, pointsize=8)
 
@@ -666,30 +640,30 @@ mtext("HIV prevalence (%)", 2, 0.5, outer=TRUE, font=1, las=3, cex=1.2)
 mtext("A", 3, -0.3, outer=TRUE, font=2, cex=1.5, adj=-0.03)
 ####  Panel B  ####
 par(mar=c(3, 3, 2, 0.5))
-plot(100*fig2b$fem, 100*fig2b$preg, type="n", ylim=c(-70, 30), xlim=c(-70, 30),
+plot(100*fig2bc$fem, 100*fig2bc$preg, type="n", ylim=c(-70, 30), xlim=c(-70, 30),
      xlab="All women: relative prev. change",
      ylab="",
      xaxt="n", yaxt="n")
 abline(0, 1, col="grey")
 abline(h=0, v=0, lty=2, col="grey")
-text(100*fig2b$fem[1:13], 100*fig2b$preg[1:13], country.codes, cex=0.7, font=2, col="darkred")
-points(100*fig2b$fem[14:17], 100*fig2b$preg[14:17], pch=1:4, lwd=1.5, cex=1.2)
+text(100*fig2bc$fem[1:13], 100*fig2bc$preg[1:13], country.codes, cex=0.7, font=2, col="darkred")
+points(100*fig2bc$fem[14:17], 100*fig2bc$preg[14:17], pch=1:4, lwd=1.5, cex=1.2)
 axis(1, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
 axis(2, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
 mtext("Pregnant women: relative prev. change", 2, 2.5, las=3)
 legend("topleft", c("Western", "Eastern", "Southern", "All"), pch=1:4, lwd=1.5, pt.cex=1.2, lty=0, cex=0.9)
 mtext("B", 3, 0.7, font=2, cex=1.5, adj=-0.25)
 ####  Panel C  ####
-plot(100*fig2c$fem[1:12], 100*fig2c$ageadj.preg[1:12], type="n", ylim=c(-70, 30), xlim=c(-70, 30),
+plot(100*fig2bc$fem[1:13], 100*fig2bc$ageadj.preg[1:13], type="n", ylim=c(-70, 30), xlim=c(-70, 30),
      xlab="All women: relative prev. change",
      ylab="",
      xaxt="n", yaxt="n")
 abline(0, 1, col="grey")
 abline(h=0, v=0, lty=2, col="grey")
-## text(100*fig2c$fem[1:12], 100*fig2c$preg[1:12], fig2c$code[1:12], cex=0.6, font=1, col=transp("darkred", 0.3))
-## points(100*fig2c$fem[13:16], 100*fig2c$preg[13:16], pch=1:4, lwd=1, cex=1.2, col=transp(1, 0.3))
-text(100*fig2c$fem[1:12], 100*fig2c$ageadj.preg[1:12], fig2c$code[1:12], cex=0.7, font=2, col="darkred")
-points(100*fig2c$fem[13:16], 100*fig2c$ageadj.preg[13:16], pch=1:4, lwd=1.5, cex=1.2, col=1)
+## text(100*fig2bc$fem[1:13], 100*fig2bc$preg[1:13], fig2bc$code[1:13], cex=0.6, font=1, col=transp("darkred", 0.3))
+## points(100*fig2bc$fem[14:17], 100*fig2bc$preg[14:17], pch=1:4, lwd=1, cex=1.2, col=transp(1, 0.3))
+text(100*fig2bc$fem[1:13], 100*fig2bc$ageadj.preg[1:13], fig2bc$code[1:13], cex=0.7, font=2, col="darkred")
+points(100*fig2bc$fem[14:17], 100*fig2bc$ageadj.preg[14:17], pch=1:4, lwd=1.5, cex=1.2, col=1)
 axis(1, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
 axis(2, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
 mtext("Preg. women: age-adjusted rel. prev. change", 2, 2.5, las=3)
@@ -733,7 +707,7 @@ fnPlotAgeTrend <- function(dat, ylim.val){
   return(NULL)
 }
 
-quartz(w=3.23, h=4.4, pointsize=8)
+quartz(w=3.23, h=4.6, pointsize=8)
 
 par(oma=c(3.5, 1.5, 1.0, 0), mfrow=c(4, 3), mar=c(0.5, 1.2, 1.5, 0.5), cex=1, tcl=-0.25, mgp=c(2, 0.5, 0), cex.axis=0.9, las=1)
 ###  Western  ###
@@ -760,7 +734,7 @@ axis(1, 1:2, c("Per. 1", "Per. 2"), lwd.ticks=NA)
 mtext("All", 3, 0.2, at=0.3, adj=0, font=2)
 fnPlotAgeTrend(subset(age25to34.prev, region=="All"), c(0, 15))
 axis(1, 1:2, c("Per. 1", "Per. 2"), lwd.ticks=NA)
-legend("bottom", c("All women 15-49 y", "Currently pregnant"), col=c(col.fem, col.preg), lwd=2, xpd=NA, horiz=TRUE, inset=-0.75)
+legend("bottom", c("All women 15-49 y", "Currently pregnant"), col=c(col.fem, col.preg), lwd=2, xpd=NA, horiz=TRUE, inset=-0.7)
 fnPlotAgeTrend(subset(age35to49.prev, region=="All"), c(0, 15))
 axis(1, 1:2, c("Per. 1", "Per. 2"), lwd.ticks=NA)
 mtext("HIV prevalence (%)", 2, 0.4, las=3, cex=1.1, outer=TRUE)
