@@ -12,7 +12,7 @@ bf03$period <- "per1"
 cm04$period <- "per1"
 ci05$period <- "per1"
 et05$period <- "per1"
-ke03$period <- "per1"
+## ke03$period <- "per1"
 ls04$period <- "per1"
 mw04$period <- "per1"
 rw05$period <- "per1"
@@ -24,7 +24,7 @@ bf10$period <- "per2"
 cm11$period <- "per2"
 ci11$period <- "per2"
 et11$period <- "per2"
-ke09$period <- "per2"
+## ke09$period <- "per2"
 ls09$period <- "per2"
 mw10$period <- "per2"
 rw10$period <- "per2"
@@ -33,6 +33,65 @@ tz12$period <- "per2"
 zw11$period <- "per2"
 
 tz04$period <- NA
+
+
+######################
+####  Kenya data  ####
+######################
+
+## update period for ke03 and ke09
+
+ke03$period <- NA
+ke09$period <- "per1"
+
+
+## KAIS 2007 and 2012
+
+library(sas7bdat)
+ke07 <- read.sas7bdat("~/Documents/Data/Kenya/KAIS/surveymodel_kais2007.sas7bdat")
+ke12 <- read.sas7bdat("~/Documents/Data/Kenya/KAIS/survemodel_kais2012.sas7bdat")
+
+ke07$age <- ke07$Q103
+ke07$sex <- factor(is.na(ke07$currentpreg), c(TRUE, FALSE), c("male", "female")) # this is wrong for age 50+
+
+ke07 <- with(subset(ke07, sex == "female" & age %in% 15:49),
+             data.frame(cluster        = QCLUST,
+                        household      = NA,
+                        line           = NA,
+                        country        = "Kenya",
+                        region         = "Eastern",
+                        survyear       = "2007",
+                        period         = NA,
+                        psu            = QCLUST,
+                        stratum        = factor(STRATA1),
+                        sex            = sex,
+                        age            = age,
+                        agegroup       = cut(age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE),
+                        currpreg       = factor(currentpreg, 1:2, c("yes", "no or unsure")),
+                        hivres         = hiv3 == 1,
+                        hivweight      = BL_WEIGHT,
+                        pophivweight   = sum(ke09$pophivweight)*BL_WEIGHT/sum(BL_WEIGHT)))
+
+ke12$age <- ke12$q_102
+ke12$sex <- factor(ke12$sex, 1:2, c("male", "female"))
+
+ke12 <- with(subset(ke12, sex == "female" & age %in% 15:49 & !is.na(abweight)),
+             data.frame(cluster        = qclust,
+                        household      = NA,
+                        line           = NA,
+                        country        = "Kenya",
+                        region         = "Eastern",
+                        survyear       = "2012",
+                        period         = "per2",
+                        psu            = qclust,
+                        stratum        = factor(Strata2),
+                        sex            = sex,
+                        age            = age,
+                        agegroup       = cut(age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE),
+                        currpreg       = factor(currentpreg, 1:2, c("yes", "no or unsure")),
+                        hivres         = hiv == 1,
+                        hivweight      = abweight,
+                        pophivweight   = sum(ke09$pophivweight)*abweight/sum(abweight)))
 
 
 #############################
@@ -139,7 +198,7 @@ pooldat <- rbind(bf03, bf10,
                  cm04, cm11,
                  ci05, ci11,
                  et05, et11,
-                 ke03, ke09,
+                 ke03, ke07, ke09, ke12,
                  ls04, ls09,
                  mw04, mw10,
                  rw05, rw10,
@@ -337,7 +396,7 @@ save(frac.preg.country, frac.preg.region, frac.preg.all, frac.preg,
      fem.ageprev.country, preg.ageprev.country, fem.ageprev.region, preg.ageprev.region, fem.ageprev.all, preg.ageprev.all, fem.ageprev, preg.ageprev,
      fem.agedist.country, preg.agedist.country, fem.agedist.region, preg.agedist.region, fem.agedist.all, preg.agedist.all, fem.agedist, preg.agedist,
      preg.byage, fem.byage, prev.byage, ageadj.preg.prev, ageadj.preg.prev.var, ageadj.preg.prev.change, ageadj.preg.prev.change.var,
-     file="workspace_2014-06-14.RData")
+     file="workspace_2014-06-19.RData")
 
 ### linear models  ###
 mod.western.rr <- svyglm(hivres~country+currpreg*period, subset(femdes, region=="Western"), family=binomial(log))
@@ -585,23 +644,23 @@ country.codes <- c("BF", "CM", "CI", "SN", "ET", "KE", "RW", "TZ", "LS", "MW", "
 fem.prev.country.survyear <- svyby(~hivres, by=~country+survyear, femdes, svyciprop, vartype=c("se", "ci"), na.rm=TRUE)
 preg.prev.country.survyear <- svyby(~hivres, by=~country+survyear, pregdes, svyciprop, vartype=c("se", "ci"), na.rm=TRUE)
 
-fig2.dat <- merge(setNames(fem.prev.country.survyear, c("country","survyear", "hivres.fem", "se.fem", "ci_l.fem", "ci_u.fem")),
+fig2a.dat <- merge(setNames(fem.prev.country.survyear, c("country","survyear", "hivres.fem", "se.fem", "ci_l.fem", "ci_u.fem")),
                   setNames(preg.prev.country.survyear, c("country","survyear", "hivres.preg", "se.preg", "ci_l.preg", "ci_u.preg")))
 
-fig2.dat$year <- as.numeric(as.character(fig2.dat$survyear))
-fig2.dat$year[fig2.dat$survyear=="2003-04"] <- 2003.5
-fig2.dat$year[fig2.dat$survyear=="2005-06"] <- 2005.5
-fig2.dat$year[fig2.dat$survyear=="2006-07"] <- 2006.5
-fig2.dat$year[fig2.dat$survyear=="2007-08"] <- 2007.5
-fig2.dat$year[fig2.dat$survyear=="2008-09"] <- 2008.5
-fig2.dat$year[fig2.dat$survyear=="2010-11"] <- 2010.5
-fig2.dat$year[fig2.dat$survyear=="2011-12"] <- 2011.5
+fig2a.dat$year <- as.numeric(as.character(fig2a.dat$survyear))
+fig2a.dat$year[fig2a.dat$survyear=="2003-04"] <- 2003.5
+fig2a.dat$year[fig2a.dat$survyear=="2005-06"] <- 2005.5
+fig2a.dat$year[fig2a.dat$survyear=="2006-07"] <- 2006.5
+fig2a.dat$year[fig2a.dat$survyear=="2007-08"] <- 2007.5
+fig2a.dat$year[fig2a.dat$survyear=="2008-09"] <- 2008.5
+fig2a.dat$year[fig2a.dat$survyear=="2010-11"] <- 2010.5
+fig2a.dat$year[fig2a.dat$survyear=="2011-12"] <- 2011.5
 
-fig2.dat <- rbind(NA, fig2.dat)
-fig2.dat[1,1:2] <- c("South Africa", "2002")
-fig2.dat[1,-(1:2)] <- c(0.177, NA, 0.153, 0.203, 0.275, NA, 0.147, 0.454, 2002)
+fig2a.dat <- rbind(NA, fig2a.dat)
+fig2a.dat[1,1:2] <- c("South Africa", "2002")
+fig2a.dat[1,-(1:2)] <- c(0.177, NA, 0.153, 0.203, 0.275, NA, 0.147, 0.454, 2002)
 
-fig2.list <- split(fig2.dat, fig2.dat$country)
+fig2a.list <- split(fig2a.dat, fig2a.dat$country)
 
 
 ## panels B & C
@@ -618,7 +677,7 @@ par(oma=c(1.0, 1.5, 1, 0))
 layout(cbind(rbind(1:3, 1:3, 4:6, 4:6, 7:9, 7:9, 10:12, 10:12, c(13, 14, 14), c(13, 14, 14)), 0, rep(15:16, each=5)), w=c(1, 1, 1, 0.2, 2.2))
 par(mar=c(0.5, 1, 0.5, 0.5), cex=1, tcl=-0.25, mgp=c(2, 0.5, 0), cex.axis=0.9, las=1)
 for(country in levels(pooldat$country)){
-  dat <- fig2.list[[country]]
+  dat <- fig2a.list[[country]]
   if(country %in% c("Botswana")){
     plot(NA, type="n", xlim=c(2002, 2012), ylim=c(0, 40), xaxt="n", ylab="")
   } else { 
@@ -778,6 +837,14 @@ unclass(svyciprop(~I(age %in% 15:29), femdes))
 
 ### Results, section 2 ###
 
+round(100*preg.prev.all[,c(2,4,5)], 1)
+round(100*fem.prev.all[,c(2,4,5)], 1)
+
+round(100*preg.prev.region[,c(3,5,6)], 1)
+round(100*fem.prev.region[,c(3,5,6)], 1)
+
+
+
 summary(svyglm(hivres~country+period*currpreg, subset(pooldes, sex=="female"), family=binomial(log)))
 
 
@@ -790,3 +857,7 @@ summary(svyglm(hivres~region+currpreg*period, subset(femdes, age %in% 35:49), fa
 
 summary(svyglm(hivres~country+currpreg*period, subset(femdes, age %in% 35:49), family=binomial(log)))
 summary(svyglm(hivres~country+currpreg*period, subset(femdes, age %in% 35:49), family=binomial(log)))
+
+
+mod.all.25to34.rr <- svyglm(hivres~country+currpreg*I(period=="per1"), subset(femdes, age %in% 25:34), family=binomial(log))
+mod.all.35to49.rr <- svyglm(hivres~country+currpreg*I(period=="per1"), subset(femdes, age %in% 35:49), family=binomial(log))
