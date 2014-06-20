@@ -98,35 +98,14 @@ ke12 <- with(subset(ke12, sex == "female" & age %in% 15:49 & !is.na(abweight)),
 ####  South Africa data  ####
 #############################
 
+## UN WPP 2012 -- female 15-49 population size, 2012: 14095144
+sa.wpp2012.fempopsize <- 14095144
+
 library(foreign)
 
 sa05 <- read.dta("~/Documents/Data/South Africa/HSRC surveys/currpreg-hiv-trends/ANC vs population prevalence2005.dta")
 sa08 <- read.dta("~/Documents/Data/South Africa/HSRC surveys/currpreg-hiv-trends/ANC vs population prevalence2008.dta")
 sa12 <- read.dta("~/Documents/Data/South Africa/HSRC surveys/currpreg-hiv-trends/ANC vs population prevalence2012.dta")
-
-sa05$country <- "South Africa"
-sa08$country <- "South Africa"
-sa12$country <- "South Africa"
-
-sa05$region <- "Southern"
-sa08$region <- "Southern"
-sa12$region <- "Southern"
-
-sa05$survyear <- "2005"
-sa08$survyear <- "2008"
-sa12$survyear <- "2012"
-
-sa05$period <- NA
-sa08$period <- "per1"
-sa12$period <- "per2"
-
-sa05$stratum <- factor(sa05$stratum)
-sa08$stratum <- factor(sa08$stratum)
-sa12$stratum <- factor(sa12$stratum)
-
-sa05$cluster <- sa05$psu
-sa08$cluster <- sa08$psu
-sa12$cluster <- sa12$psu
 
 sa05$sex <- factor(sa05$sex, c("Male", "Female"), c("male", "female"))
 sa08$sex <- factor(sa08$sex, c("male", "female"), c("male", "female"))
@@ -136,30 +115,59 @@ sa05$age <- floor(sa05$age)
 sa08$age <- floor(sa08$age)
 sa12$age <- floor(sa12$age)
 
-sa05$agegroup <- cut(sa05$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE)
-sa08$agegroup <- cut(sa08$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE)
-sa12$agegroup <- cut(sa12$age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE)
+sa05 <- with(subset(sa05, sex == "female" & age %in% 15:49 & !is.na(hivweight)),
+             data.frame(cluster        = psu,
+                        household      = household,
+                        line           = line,
+                        country        = "South Africa",
+                        region         = "Southern",
+                        survyear       = "2005",
+                        period         = NA,
+                        psu            = psu,
+                        stratum        = factor(stratum),
+                        sex            = sex,
+                        age            = age,
+                        agegroup       = cut(age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE),
+                        currpreg       = factor(currpreg, c("No or unsure", "Yes"), c("no or unsure", "yes")),
+                        hivres         = hivres== "HIV+",
+                        hivweight      = hivweight,
+                        pophivweight   = hivweight*sa.wpp2012.fempopsize/sum(hivweight)))
 
-sa05$currpreg <- factor(sa05$currpreg, c("No or unsure", "Yes"), c("no or unsure", "yes"))
-sa08$currpreg <- factor(sa08$currpreg, c("No or unsure", "Yes"), c("no or unsure", "yes"))
-sa12$currpreg <- factor(sa12$currpreg, c("No or unsure", "Yes"), c("no or unsure", "yes"))
+sa08 <- with(subset(sa08, sex == "female" & age %in% 15:49 & !is.na(hivweight)),
+             data.frame(cluster        = psu,
+                        household      = household,
+                        line           = line,
+                        country        = "South Africa",
+                        region         = "Southern",
+                        survyear       = "2005",
+                        period         = NA,
+                        psu            = psu,
+                        stratum        = factor(stratum),
+                        sex            = sex,
+                        age            = age,
+                        agegroup       = cut(age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE),
+                        currpreg       = factor(currpreg, c("No or unsure", "Yes"), c("no or unsure", "yes")),
+                        hivres         = hivres== "HIV+",
+                        hivweight      = hivweight,
+                        pophivweight   = hivweight*sa.wpp2012.fempopsize/sum(hivweight)))
 
-sa05$hivres <- sa05$hivres== "HIV+"
-sa08$hivres <- sa08$hivres== "HIV+"
-sa12$hivres <- sa12$hivres== "HIV+"
-
-sa05$pophivweight <- NA
-sa08$pophivweight <- NA
-sa12$pophivweight <- NA
-
-sa05 <- subset(sa05, sex=="female" & age %in% 15:49 & !is.na(hivres), names(bf03))
-sa08 <- subset(sa08, sex=="female" & age %in% 15:49 & !is.na(hivres), names(bf03))
-sa12 <- subset(sa12, sex=="female" & age %in% 15:49 & !is.na(hivres), names(bf03))
-
-## UN WPP 2012 -- female 15-49 population size, 2012: 14095144
-sa05$pophivweight <- sa05$hivweight*14095144/sum(sa05$hivweight)
-sa08$pophivweight <- sa08$hivweight*14095144/sum(sa08$hivweight)
-sa12$pophivweight <- sa12$hivweight*14095144/sum(sa12$hivweight)
+sa12 <- with(subset(sa12, sex == "female" & age %in% 15:49 & !is.na(hivweight)),
+             data.frame(cluster        = psu,
+                        household      = household,
+                        line           = line,
+                        country        = "South Africa",
+                        region         = "Southern",
+                        survyear       = "2005",
+                        period         = NA,
+                        psu            = psu,
+                        stratum        = factor(stratum),
+                        sex            = sex,
+                        age            = age,
+                        agegroup       = cut(age, 3:10*5, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"), right=FALSE),
+                        currpreg       = factor(currpreg, c("No or unsure", "Yes"), c("no or unsure", "yes")),
+                        hivres         = hivres== "HIV+",
+                        hivweight      = hivweight,
+                        pophivweight   = hivweight*sa.wpp2012.fempopsize/sum(hivweight)))
 
 
 ##########################
