@@ -521,8 +521,17 @@ library(RColorBrewer)
 
 fnCIplot <- function(mat){c(mat[,1], rev(mat[,2]))}
 
+lty.preg <- 2
+lty.fem <- 1
+
+pch.preg <- 17
+pch.fem <- 20
+
 col.preg <- "forestgreen"
 col.fem <- "royalblue"
+
+lty.per1 <- 1
+lty.per2 <- 2
 
 col.per1 <- brewer.pal(3, "Dark2")[1]
 col.per2 <- brewer.pal(3, "Dark2")[2]
@@ -541,8 +550,8 @@ par(mar=c(0.5, 0.5, 0.5, 0.5), cex=1, tcl=-0.25, mgp=c(2, 0.5, 0), cex.axis=0.9)
 ####                  ####
 plot(subset(preg.agedist, area=="Western" & period=="both")$prop,
      type="l", ylim=c(0, 0.35), xaxt="n", yaxt="n",
-     col=col.preg, lwd=2)
-lines(subset(fem.agedist, area=="Western" & period=="both")$prop, col=col.fem, lwd=2)
+     col=col.preg, lwd=2, lty=lty.preg)
+lines(subset(fem.agedist, area=="Western" & period=="both")$prop, col=col.fem, lwd=2, lty=lty.fem)
 polygon(c(1:7, 7:1), fnCIplot(subset(preg.agedist, area=="Western" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.preg, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.agedist, area=="Western" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.fem, 0.3), border=NA)
 mtext("Western", 3, -1.1, font=2, adj=0.95)
@@ -553,8 +562,8 @@ mtext("A", 3, 0.2, adj=-0.35, font=2, cex=1.5)
 ##
 plot(subset(preg.agedist, area=="Eastern" & period=="both")$prop,
      type="l", ylim=c(0, 0.35), xaxt="n", yaxt="n",
-     col=col.preg, lwd=2)
-lines(subset(fem.agedist, area=="Eastern" & period=="both")$prop, col=col.fem, lwd=2)
+     col=col.preg, lwd=2, lty=lty.preg)
+lines(subset(fem.agedist, area=="Eastern" & period=="both")$prop, col=col.fem, lwd=2, lty=lty.fem)
 polygon(c(1:7, 7:1), fnCIplot(subset(preg.agedist, area=="Eastern" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.preg, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.agedist, area=="Eastern" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.fem, 0.3), border=NA)
 mtext("Eastern", 3, -1.1, font=2, adj=0.95)
@@ -563,8 +572,8 @@ axis(2, 0:3/10, FALSE, las=1)
 ##
 plot(subset(preg.agedist, area=="Southern" & period=="both")$prop,
      type="l", ylim=c(0, 0.35), xaxt="n", yaxt="n",
-     col=col.preg, lwd=2,)
-lines(subset(fem.agedist, area=="Southern" & period=="both")$prop, col=col.fem, lwd=2)
+     col=col.preg, lwd=2, lty=lty.preg)
+lines(subset(fem.agedist, area=="Southern" & period=="both")$prop, col=col.fem, lwd=2, lty=lty.fem)
 polygon(c(1:7, 7:1), fnCIplot(subset(preg.agedist, area=="Southern" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.preg, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.agedist, area=="Southern" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.fem, 0.3), border=NA)
 mtext("Southern", 3, -1.1, font=2, adj=0.95)
@@ -575,8 +584,8 @@ mtext("Age group", 1, 1.5, adj=-0.5)
 ##
 plot(subset(preg.agedist, area=="All" & period=="both")$prop,
      type="l", ylim=c(0, 0.35), xaxt="n", yaxt="n",
-     col=col.preg, lwd=2)
-lines(subset(fem.agedist, area=="All" & period=="both")$prop, col=col.fem, lwd=2)
+     col=col.preg, lwd=2, lty=lty.preg)
+lines(subset(fem.agedist, area=="All" & period=="both")$prop, col=col.fem, lwd=2, lty=lty.fem)
 polygon(c(1:7, 7:1), fnCIplot(subset(preg.agedist, area=="All" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.preg, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.agedist, area=="All" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.fem, 0.3), border=NA)
 mtext("All", 3, -1.1, font=2, adj=0.95)
@@ -584,14 +593,14 @@ axis(1, 1:7, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-45","45-49"))
 axis(2, 0:3/10, FALSE, las=1)
 ##
 plot(0, 0, type="n", bty="n", axes=FALSE)
-legend("bottom", c("All women", "Curr. pregnant"), col=c(col.fem, col.preg), lwd=2, xpd=NA, horiz=TRUE, cex=1, inset=-0.1)
+legend("bottom", c("All women", "Curr. pregnant"), col=c(col.fem, col.preg), lwd=2, lty=c(lty.fem, lty.preg), xpd=NA, horiz=TRUE, cex=1, inset=-0.1)
 ####                          ####
 ###  Age-prevalence all women  ###
 ####                          ####
 plot(subset(fem.ageprev, area=="Western" & period=="per1")$hivres,
      type="l", ylim=c(0, 0.1), xaxt="n", yaxt="n",
-     col=col.per1, lwd=2)
-lines(subset(fem.ageprev, area=="Western" & period=="per2")$hivres, col=col.per2, lwd=2)
+     col=col.per1, lwd=2, lty=lty.per1)
+lines(subset(fem.ageprev, area=="Western" & period=="per2")$hivres, col=col.per2, lwd=2, lty=lty.per2)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Western" & period=="per1")[,c("ci_l", "ci_u")]), col=transp(col.per1, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Western" & period=="per2")[,c("ci_l", "ci_u")]), col=transp(col.per2, 0.3), border=NA)
 mtext("Western", 3, -1.1, font=2, adj=0.05)
@@ -602,8 +611,8 @@ mtext("B", 3, 0.2, adj=-0.35, font=2, cex=1.5)
 ##
 plot(subset(fem.ageprev, area=="Eastern" & period=="per1")$hivres,
      type="l", ylim=c(0, 0.1), xaxt="n", yaxt="n",
-     col=col.per1, lwd=2)
-lines(subset(fem.ageprev, area=="Eastern" & period=="per2")$hivres, col=col.per2, lwd=2)
+     col=col.per1, lwd=2, lty=lty.per1)
+lines(subset(fem.ageprev, area=="Eastern" & period=="per2")$hivres, col=col.per2, lwd=2, lty=lty.per2)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Eastern" & period=="per1")[,c("ci_l", "ci_u")]), col=transp(col.per1, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Eastern" & period=="per2")[,c("ci_l", "ci_u")]), col=transp(col.per2, 0.3), border=NA)
 mtext("Eastern", 3, -1.1, font=2, adj=0.05)
@@ -612,8 +621,8 @@ axis(2, 0:5/50, paste(0:5*2, "%", sep=""), las=1)
 ##
 plot(subset(fem.ageprev, area=="Southern" & period=="per1")$hivres,
      type="l", ylim=c(0, 0.4), xaxt="n", yaxt="n",
-     col=col.per1, lwd=2)
-lines(subset(fem.ageprev, area=="Southern" & period=="per2")$hivres, col=col.per2, lwd=2)
+     col=col.per1, lwd=2, lty=lty.per1)
+lines(subset(fem.ageprev, area=="Southern" & period=="per2")$hivres, col=col.per2, lwd=2, lty=lty.per2)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Southern" & period=="per1")[,c("ci_l", "ci_u")]), col=transp(col.per1, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Southern" & period=="per2")[,c("ci_l", "ci_u")]), col=transp(col.per2, 0.3), border=NA)
 mtext("Southern", 3, -1.1, font=2, adj=0.05)
@@ -624,8 +633,8 @@ mtext("Age group", 1, 1.5, adj=-0.5)
 ##
 plot(subset(fem.ageprev, area=="All" & period=="per1")$hivres,
      type="l", ylim=c(0, 0.20), xaxt="n", yaxt="n",
-     col=col.per1, lwd=2)
-lines(subset(fem.ageprev, area=="All" & period=="per2")$hivres, col=col.per2, lwd=2)
+     col=col.per1, lwd=2, lty=lty.per1)
+lines(subset(fem.ageprev, area=="All" & period=="per2")$hivres, col=col.per2, lwd=2, lty=lty.per2)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="All" & period=="per1")[,c("ci_l", "ci_u")]), col=transp(col.per1, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="All" & period=="per2")[,c("ci_l", "ci_u")]), col=transp(col.per2, 0.3), border=NA)
 mtext("All", 3, -1.1, font=2, adj=0.05)
@@ -633,13 +642,9 @@ axis(1, 1:7, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-45","45-49"))
 axis(2, 0:4/20, paste(0:4*5, "%", sep=""), las=1)
 ##
 plot(0, 0, type="n", bty="n", axes=FALSE)
-legend("bottom", c("Period 1", "Period 2"), col=c(col.per1, col.per2), lwd=2, xpd=NA, horiz=TRUE, cex=1, inset=-0.1)
+legend("bottom", c("Period 1", "Period 2"), col=c(col.per1, col.per2), lwd=2, lty=c(lty.per1, lty.per2), xpd=NA, horiz=TRUE, cex=1, inset=-0.1)
 
 dev.off()
-
-
-
-
 
 
 ####################
@@ -689,10 +694,10 @@ for(country in levels(pooldat$country)){
   if(country %in% c("Botswana")){
     plot(NA, type="n", xlim=c(2002, 2012), ylim=c(0, 40), xaxt="n", ylab="")
   } else { 
-    matplot(dat$year, 100*dat[,c("hivres.fem", "hivres.preg")], type="l", lwd=2, col=c(col.fem, col.preg), lty=1,
+    matplot(dat$year, 100*dat[,c("hivres.fem", "hivres.preg")], type="l", lwd=2, col=c(col.fem, col.preg), lty=c(lty.fem, lty.preg),
             xlim=c(2002, 2012), ylim=c(0, 100*1.2*max(c(dat$ci_u.preg, dat$ci_u.fem))),
             ylab="", xaxt="n", xlab="")
-    matpoints(dat$year, 100*dat[,c("hivres.fem", "hivres.preg")], pch=20, lwd=1, col=c(col.fem, col.preg))
+    matpoints(dat$year, 100*dat[,c("hivres.fem", "hivres.preg")], pch=c(pch.fem, pch.preg), lwd=1, col=c(col.fem, col.preg))
     polygon(c(dat$year, rev(dat$year)), 100*c(dat$ci_l.fem, rev(dat$ci_u.fem)), col=transp(col.fem, 0.2), border=NA)
     polygon(c(dat$year, rev(dat$year)), 100*c(dat$ci_l.preg, rev(dat$ci_u.preg)), col=transp(col.preg, 0.2), border=NA)
   }
@@ -702,7 +707,7 @@ for(country in levels(pooldat$country)){
     axis(1, lwd.ticks=NA)
 }
 plot(0, 0, type="n", bty="n", axes=FALSE)
-legend("center", c("All women 15-49 y", "Currently pregnant women"), lwd=2, col=c(col.fem, col.preg), lty=1, xpd=NA, inset=0.3)
+legend("center", c("All women 15-49 y", "Currently pregnant women"), lwd=2, col=c(col.fem, col.preg), lty=c(lty.fem, lty.preg), pch=c(pch.fem, pch.preg), xpd=NA, inset=0.3)
 mtext("HIV prevalence (%)", 2, 0.5, outer=TRUE, font=1, las=3, cex=1.2)
 mtext("A", 3, -0.3, outer=TRUE, font=2, cex=1.5, adj=-0.03)
 ####  Panel B  ####
@@ -765,9 +770,9 @@ age35to49.prev <- merge(fem.age35to49.prev, preg.age35to49.prev, by=c("region", 
 
 fnPlotAgeTrend <- function(dat, ylim.val){
   matplot(100*dat[,c("hivres.fem", "hivres.preg")],
-          type="l", col=c(col.fem, col.preg), lwd=1.5, lty=1, ylim=ylim.val, xlim=c(0.7, 2.3), xaxt="n")
+          type="l", col=c(col.fem, col.preg), lwd=1.5, lty=c(lty.fem, lty.preg), ylim=ylim.val, xlim=c(0.7, 2.3), xaxt="n")
   matpoints(100*dat[,c("hivres.fem", "hivres.preg")],
-            col=c(col.fem, col.preg), lwd=1, pch=20)
+            col=c(col.fem, col.preg), lwd=1, pch=c(pch.fem, pch.preg))
   polygon(c(1:2, 2:1), 100*fnCIplot(dat[,c("ci_l.preg", "ci_u.preg")]), col=transp(col.preg, 0.2), border=NA)
   polygon(c(1:2, 2:1), 100*fnCIplot(dat[,c("ci_l.fem", "ci_u.fem")]), col=transp(col.fem, 0.2), border=NA)
   axis(1, 1:2, FALSE)
@@ -801,7 +806,7 @@ axis(1, 1:2, c("Per. 1", "Per. 2"), lwd.ticks=NA)
 mtext("All", 3, 0.2, at=0.3, adj=0, font=2)
 fnPlotAgeTrend(subset(age25to34.prev, region=="All"), c(0, 15))
 axis(1, 1:2, c("Per. 1", "Per. 2"), lwd.ticks=NA)
-legend("bottom", c("All women 15-49 y", "Currently pregnant"), col=c(col.fem, col.preg), lwd=2, xpd=NA, horiz=TRUE, inset=-0.7)
+legend("bottom", c("All women 15-49 y", "Currently pregnant"), col=c(col.fem, col.preg), lwd=2, xpd=NA, horiz=TRUE, inset=-0.7, lty=c(lty.fem, lty.preg), pch=c(pch.fem, pch.preg))
 fnPlotAgeTrend(subset(age35to49.prev, region=="All"), c(0, 15))
 axis(1, 1:2, c("Per. 1", "Per. 2"), lwd.ticks=NA)
 mtext("HIV prevalence (%)", 2, 0.4, las=3, cex=1.1, outer=TRUE)
