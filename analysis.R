@@ -7,34 +7,6 @@ setwd("./")
 
 load("currpreg-dhs-datasets.RData")
 
-## assign period
-bf03$period <- "per1"
-cm04$period <- "per1"
-ci05$period <- "per1"
-et05$period <- "per1"
-## ke03$period <- "per1"
-ls04$period <- "per1"
-mw04$period <- "per1"
-rw05$period <- "per1"
-sn05$period <- "per1"
-tz08$period <- "per1"
-zw06$period <- "per1"
-
-bf10$period <- "per2"
-cm11$period <- "per2"
-ci11$period <- "per2"
-et11$period <- "per2"
-## ke09$period <- "per2"
-ls09$period <- "per2"
-mw10$period <- "per2"
-rw10$period <- "per2"
-sn11$period <- "per2"
-tz12$period <- "per2"
-zw11$period <- "per2"
-
-tz04$period <- NA
-
-
 ######################
 ####  Kenya data  ####
 ######################
@@ -139,8 +111,8 @@ sa08 <- with(subset(sa08, sex == "female" & age %in% 15:49 & !is.na(hivweight)),
                         line           = line,
                         country        = "South Africa",
                         region         = "Southern",
-                        survyear       = "2005",
-                        period         = NA,
+                        survyear       = "2008",
+                        period         = "per1",
                         psu            = psu,
                         stratum        = factor(stratum),
                         sex            = sex,
@@ -157,8 +129,8 @@ sa12 <- with(subset(sa12, sex == "female" & age %in% 15:49 & !is.na(hivweight)),
                         line           = line,
                         country        = "South Africa",
                         region         = "Southern",
-                        survyear       = "2005",
-                        period         = NA,
+                        survyear       = "2012",
+                        period         = "per2",
                         psu            = psu,
                         stratum        = factor(stratum),
                         sex            = sex,
@@ -216,9 +188,6 @@ pooldat <- rbind(bf03, bf10,
                  sa08, sa12, sa05,
                  sz07, sz11)
 
-## pooldat$country <- factor(pooldat$country, c("Burkina Faso", "Cameroon", "Cote d'Ivoire", "Senegal",
-##                                                "Ethiopia", "Kenya", "Rwanda", "Tanzania",
-##                                                "Botswana", "Lesotho", "Malawi", "South Africa", "Swaziland", "Zimbabwe"))
 pooldat$country <- factor(pooldat$country, c("Burkina Faso", "Cameroon", "Cote d'Ivoire", "Senegal",
                                              "Ethiopia", "Kenya", "Rwanda", "Tanzania",
                                              "Lesotho", "Malawi", "South Africa", "Swaziland", "Zimbabwe"))
@@ -268,7 +237,7 @@ excess.decline.var <- fem.prev.change.var + preg.prev.change.var -
   subset(frac.preg, period=="per2")$currpreg*subset(preg.prev, period=="per2")$var
 
 
-###  Age adjusted prevalence  ###
+###  Age standardized prevalence  ###
 
 ## age-specific prevalence
 fem.ageprev.country <- svyby(~hivres, ~country+agegroup+period, femdes, svyciprop, vartype=c("ci", "se", "var"))
@@ -396,15 +365,6 @@ ageadj.preg.prev.var <- tapply(prev.byage$var.preg*prev.byage$prop.fem^2, prev.b
 ageadj.preg.prev.change <- ageadj.preg.prev[,"per2"] - ageadj.preg.prev[,"per1"]
 ageadj.preg.prev.change.var <- ageadj.preg.prev.var[,"per2"] + ageadj.preg.prev.var[,"per1"]
 
-### save analysis
-save(frac.preg.country, frac.preg.region, frac.preg.all, frac.preg,
-     fem.prev, preg.prev,
-     fem.prev.change, preg.prev.change, fem.prev.change.var, preg.prev.change.var,
-     excess.decline, excess.decline.var,
-     fem.ageprev.country, preg.ageprev.country, fem.ageprev.region, preg.ageprev.region, fem.ageprev.all, preg.ageprev.all, fem.ageprev, preg.ageprev,
-     fem.agedist.country, preg.agedist.country, fem.agedist.region, preg.agedist.region, fem.agedist.all, preg.agedist.all, fem.agedist, preg.agedist,
-     preg.byage, fem.byage, prev.byage, ageadj.preg.prev, ageadj.preg.prev.var, ageadj.preg.prev.change, ageadj.preg.prev.change.var,
-     file="workspace_2014-06-19.RData")
 
 ### linear models  ###
 mod.western.rr <- svyglm(hivres~country+currpreg*period, subset(femdes, region=="Western"), family=binomial(log))
@@ -426,23 +386,6 @@ mod.western.35to49.rr <- svyglm(hivres~country+currpreg*I(period=="per1"), subse
 mod.eastern.35to49.rr <- svyglm(hivres~country+currpreg*I(period=="per1"), subset(femdes, age %in% 35:49 & region=="Eastern"), family=binomial(log))
 mod.southern.35to49.rr <- svyglm(hivres~country+currpreg*I(period=="per1"), subset(femdes, age %in% 35:49 & region=="Southern"), family=binomial(log))
 mod.all.35to49.rr <- svyglm(hivres~country+currpreg*I(period=="per1"), subset(femdes, age %in% 35:49), family=binomial(log))
-
-
-mod.western.age.or <- svyglm(hivres~country+agegroup*period+currpreg*period, subset(femdes, region=="Western"), family=binomial)
-mod.western.age.rr <- svyglm(hivres~country+agegroup*period+currpreg*period, subset(femdes, region=="Western"), family=binomial(log), start=coef(mod.western.age.or))
-
-mod.eastern.age.or <- svyglm(hivres~country+agegroup*period+currpreg*period, subset(femdes, region=="Eastern"), family=binomial)
-mod.eastern.age.rr <- svyglm(hivres~country+agegroup*period+currpreg*period, subset(femdes, region=="Eastern"), family=binomial(log), start=coef(mod.eastern.age.or))
-
-mod.southern.age.or <- svyglm(hivres~country+agegroup*period+currpreg*period, subset(femdes, region=="Southern"), family=binomial)
-mod.southern.age.rr <- svyglm(hivres~country+agegroup*period+currpreg*period, subset(femdes, region=="Southern"), family=binomial(log), start=coef(mod.southern.age.or))
-
-mod.all.age.or <- svyglm(hivres~country+agegroup*period+currpreg*period, femdes, family=binomial)
-mod.all.age.rr <- svyglm(hivres~country+agegroup*period+currpreg*period, femdes, family=binomial(log), start=coef(mod.all.age.or))
-
-mod.all.age.or <- svyglm(hivres~country+(I(age-30)+I((age-30)^2) + I((age-30)^3))*period+currpreg*period, femdes, family=binomial)
-mod.all.age.rr <- svyglm(hivres~country+(I(age-30)+I((age-30)^2) + I((age-30)^3))*period+currpreg*period, femdes, family=binomial(log), start=coef(mod.all.age.or))
-
 
 
 ###################
@@ -495,20 +438,20 @@ sprintf("%4.1f (%.1f) %4.1f (%.1f) %4.1f (%.1f) %4.1f (%.1f) %4.1f (%.1f) %4.1f 
         100*subset(fem.prev, period=="per1")$se,
         100*subset(preg.prev, period=="per1")$hivres,
         100*subset(preg.prev, period=="per1")$se,
-        100*ageadj.preg.prev[!rownames(ageadj.preg.prev) %in% c("Botswana"),"per1"],
-        100*sqrt(ageadj.preg.prev.var[!rownames(ageadj.preg.prev) %in% c("Botswana"),"per1"]),
+        100*ageadj.preg.prev[,"per1"],
+        100*sqrt(ageadj.preg.prev.var[,"per1"]),
         100*subset(fem.prev, period=="per2")$hivres,
         100*subset(fem.prev, period=="per2")$se,
         100*subset(preg.prev, period=="per2")$hivres,
         100*subset(preg.prev, period=="per2")$se,
-        100*ageadj.preg.prev[!rownames(ageadj.preg.prev) %in% c("Botswana"),"per2"],
-        100*sqrt(ageadj.preg.prev.var[!rownames(ageadj.preg.prev) %in% c("Botswana"),"per2"]),
+        100*ageadj.preg.prev[,"per2"],
+        100*sqrt(ageadj.preg.prev.var[,"per2"]),
         100*fem.prev.change,
         100*sqrt(fem.prev.change.var),
         100*preg.prev.change,
         100*sqrt(preg.prev.change.var),
-        100*ageadj.preg.prev.change[!rownames(ageadj.preg.prev) %in% c("Botswana")],
-        100*sqrt(ageadj.preg.prev.change.var[!rownames(ageadj.preg.prev) %in% c("Botswana")]))
+        100*ageadj.preg.prev.change,
+        100*sqrt(ageadj.preg.prev.change.var))
 
 
 
@@ -519,9 +462,9 @@ sprintf("%4.1f (%.1f) %4.1f (%.1f) %4.1f (%.1f) %4.1f (%.1f) %4.1f (%.1f) %4.1f 
 library(adegenet)
 library(RColorBrewer)
 
-fnCIplot <- function(mat){c(mat[,1], rev(mat[,2]))}
+vfnCIplot <- function(mat){c(mat[,1], rev(mat[,2]))}
 
-lty.preg <- 2
+lty.preg <- 1
 lty.fem <- 1
 
 pch.preg <- 17
@@ -531,17 +474,17 @@ col.preg <- "forestgreen"
 col.fem <- "royalblue"
 
 lty.per1 <- 1
-lty.per2 <- 2
+lty.per2 <- 1
+
+pch.per1 <- 17
+pch.per2 <- 20
 
 col.per1 <- brewer.pal(3, "Dark2")[1]
 col.per2 <- brewer.pal(3, "Dark2")[2]
 
-## col.preg <- brewer.pal(5, "Dark2")[4]
-## col.fem <- brewer.pal(5, "Dark2")[5]
-
-quartz(w=6.8, h=3.2, pointsize=8)
-
-## pdf("Paper/draft 1/age-specific-prev.pdf", w=6, h=5, pointsize=8)
+## quartz(w=6.8, h=3.2, pointsize=8)
+pdf("currpreg-hiv-trends_figure1.pdf", w=6.8, h=3.2, pointsize=8)
+##
 par(oma=c(0, 0, 1, 0.3))
 layout(cbind(0, rbind(1:2, 3:4, 5), 0, rbind(c(6, 0, 7), c(8, 0, 9), 10)), c(0.3, 1, 1, 0.3, 1, 0.1, 1), c(1, 1, 0.35))
 par(mar=c(0.5, 0.5, 0.5, 0.5), cex=1, tcl=-0.25, mgp=c(2, 0.5, 0), cex.axis=0.9)
@@ -554,6 +497,8 @@ plot(subset(preg.agedist, area=="Western" & period=="both")$prop,
 lines(subset(fem.agedist, area=="Western" & period=="both")$prop, col=col.fem, lwd=2, lty=lty.fem)
 polygon(c(1:7, 7:1), fnCIplot(subset(preg.agedist, area=="Western" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.preg, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.agedist, area=="Western" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.fem, 0.3), border=NA)
+points(subset(preg.agedist, area=="Western" & period=="both")$prop, col=col.preg, pch=pch.preg)
+points(subset(fem.agedist, area=="Western" & period=="both")$prop, col=col.fem, pch=pch.fem)
 mtext("Western", 3, -1.1, font=2, adj=0.95)
 axis(1, 1:7, FALSE)
 axis(2, 0:3/10, paste(0:3*10, "%", sep=""), las=1)
@@ -566,6 +511,8 @@ plot(subset(preg.agedist, area=="Eastern" & period=="both")$prop,
 lines(subset(fem.agedist, area=="Eastern" & period=="both")$prop, col=col.fem, lwd=2, lty=lty.fem)
 polygon(c(1:7, 7:1), fnCIplot(subset(preg.agedist, area=="Eastern" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.preg, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.agedist, area=="Eastern" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.fem, 0.3), border=NA)
+points(subset(preg.agedist, area=="Eastern" & period=="both")$prop, col=col.preg, pch=pch.preg)
+points(subset(fem.agedist, area=="Eastern" & period=="both")$prop, col=col.fem, pch=pch.fem)
 mtext("Eastern", 3, -1.1, font=2, adj=0.95)
 axis(1, 1:7, FALSE)
 axis(2, 0:3/10, FALSE, las=1)
@@ -576,6 +523,8 @@ plot(subset(preg.agedist, area=="Southern" & period=="both")$prop,
 lines(subset(fem.agedist, area=="Southern" & period=="both")$prop, col=col.fem, lwd=2, lty=lty.fem)
 polygon(c(1:7, 7:1), fnCIplot(subset(preg.agedist, area=="Southern" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.preg, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.agedist, area=="Southern" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.fem, 0.3), border=NA)
+points(subset(preg.agedist, area=="Southern" & period=="both")$prop, col=col.preg, pch=pch.preg)
+points(subset(fem.agedist, area=="Southern" & period=="both")$prop, col=col.fem, pch=pch.fem)
 mtext("Southern", 3, -1.1, font=2, adj=0.95)
 axis(1, 1:7, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-45","45-49"))
 axis(2, 0:3/10, paste(0:3*10, "%", sep=""), las=1)
@@ -588,12 +537,14 @@ plot(subset(preg.agedist, area=="All" & period=="both")$prop,
 lines(subset(fem.agedist, area=="All" & period=="both")$prop, col=col.fem, lwd=2, lty=lty.fem)
 polygon(c(1:7, 7:1), fnCIplot(subset(preg.agedist, area=="All" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.preg, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.agedist, area=="All" & period=="both")[,c("prop.ci_l", "prop.ci_u")]), col=transp(col.fem, 0.3), border=NA)
+points(subset(preg.agedist, area=="All" & period=="both")$prop, col=col.preg, pch=pch.preg)
+points(subset(fem.agedist, area=="All" & period=="both")$prop, col=col.fem, pch=pch.fem)
 mtext("All", 3, -1.1, font=2, adj=0.95)
 axis(1, 1:7, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-45","45-49"))
 axis(2, 0:3/10, FALSE, las=1)
 ##
 plot(0, 0, type="n", bty="n", axes=FALSE)
-legend("bottom", c("All women", "Curr. pregnant"), col=c(col.fem, col.preg), lwd=2, lty=c(lty.fem, lty.preg), xpd=NA, horiz=TRUE, cex=1, inset=-0.1)
+legend("bottom", c("All women", "Curr. pregnant"), col=c(col.fem, col.preg), lwd=2, lty=c(lty.fem, lty.preg), pch=c(pch.fem, pch.preg), xpd=NA, horiz=TRUE, cex=1, inset=-0.1)
 ####                          ####
 ###  Age-prevalence all women  ###
 ####                          ####
@@ -603,6 +554,8 @@ plot(subset(fem.ageprev, area=="Western" & period=="per1")$hivres,
 lines(subset(fem.ageprev, area=="Western" & period=="per2")$hivres, col=col.per2, lwd=2, lty=lty.per2)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Western" & period=="per1")[,c("ci_l", "ci_u")]), col=transp(col.per1, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Western" & period=="per2")[,c("ci_l", "ci_u")]), col=transp(col.per2, 0.3), border=NA)
+points(subset(fem.ageprev, area=="Western" & period=="per1")$hivres, col=col.per1, pch=pch.per1)
+points(subset(fem.ageprev, area=="Western" & period=="per2")$hivres, col=col.per2, pch=pch.per2)
 mtext("Western", 3, -1.1, font=2, adj=0.05)
 axis(1, 1:7, FALSE)
 axis(2, 0:5/50, paste(0:5*2, "%", sep=""), las=1)
@@ -615,6 +568,8 @@ plot(subset(fem.ageprev, area=="Eastern" & period=="per1")$hivres,
 lines(subset(fem.ageprev, area=="Eastern" & period=="per2")$hivres, col=col.per2, lwd=2, lty=lty.per2)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Eastern" & period=="per1")[,c("ci_l", "ci_u")]), col=transp(col.per1, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Eastern" & period=="per2")[,c("ci_l", "ci_u")]), col=transp(col.per2, 0.3), border=NA)
+points(subset(fem.ageprev, area=="Eastern" & period=="per1")$hivres, col=col.per1, pch=pch.per1)
+points(subset(fem.ageprev, area=="Eastern" & period=="per2")$hivres, col=col.per2, pch=pch.per2)
 mtext("Eastern", 3, -1.1, font=2, adj=0.05)
 axis(1, 1:7, FALSE)
 axis(2, 0:5/50, paste(0:5*2, "%", sep=""), las=1)
@@ -625,6 +580,8 @@ plot(subset(fem.ageprev, area=="Southern" & period=="per1")$hivres,
 lines(subset(fem.ageprev, area=="Southern" & period=="per2")$hivres, col=col.per2, lwd=2, lty=lty.per2)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Southern" & period=="per1")[,c("ci_l", "ci_u")]), col=transp(col.per1, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="Southern" & period=="per2")[,c("ci_l", "ci_u")]), col=transp(col.per2, 0.3), border=NA)
+points(subset(fem.ageprev, area=="Southern" & period=="per1")$hivres, col=col.per1, pch=pch.per1)
+points(subset(fem.ageprev, area=="Southern" & period=="per2")$hivres, col=col.per2, pch=pch.per2)
 mtext("Southern", 3, -1.1, font=2, adj=0.05)
 axis(1, 1:7, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-45","45-49"))
 axis(2, 0:4/10, paste(0:4*10, "%", sep=""), las=1)
@@ -637,13 +594,14 @@ plot(subset(fem.ageprev, area=="All" & period=="per1")$hivres,
 lines(subset(fem.ageprev, area=="All" & period=="per2")$hivres, col=col.per2, lwd=2, lty=lty.per2)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="All" & period=="per1")[,c("ci_l", "ci_u")]), col=transp(col.per1, 0.3), border=NA)
 polygon(c(1:7, 7:1), fnCIplot(subset(fem.ageprev, area=="All" & period=="per2")[,c("ci_l", "ci_u")]), col=transp(col.per2, 0.3), border=NA)
+points(subset(fem.ageprev, area=="All" & period=="per1")$hivres, col=col.per1, pch=pch.per1)
+points(subset(fem.ageprev, area=="All" & period=="per2")$hivres, col=col.per2, pch=pch.per2)
 mtext("All", 3, -1.1, font=2, adj=0.05)
 axis(1, 1:7, c("15-19", "20-24", "25-29", "30-34", "35-39", "40-45","45-49"))
 axis(2, 0:4/20, paste(0:4*5, "%", sep=""), las=1)
 ##
 plot(0, 0, type="n", bty="n", axes=FALSE)
-legend("bottom", c("Period 1", "Period 2"), col=c(col.per1, col.per2), lwd=2, lty=c(lty.per1, lty.per2), xpd=NA, horiz=TRUE, cex=1, inset=-0.1)
-
+legend("bottom", c("Period 1", "Period 2"), col=c(col.per1, col.per2), lwd=2, lty=c(lty.per1, lty.per2), pch=c(pch.per1, pch.per2), xpd=NA, horiz=TRUE, cex=1, inset=-0.1)
 dev.off()
 
 
@@ -651,7 +609,6 @@ dev.off()
 ####  Figure 2  ####
 ####################
 
-library(adegenet)
 country.codes <- c("BF", "CM", "CI", "SN", "ET", "KE", "RW", "TZ", "LS", "MW", "ZA", "SZ", "ZW")
 
 fem.prev.country.survyear <- svyby(~hivres, by=~country+survyear, femdes, svyciprop, vartype=c("se", "ci"), na.rm=TRUE)
@@ -684,8 +641,8 @@ fig2bc <- data.frame(code=c(country.codes, rep(NA, 4)),
                     ageadj.preg=(ageadj.preg.prev[,"per2"]/ageadj.preg.prev[,"per1"] - 1))
 
 
-quartz(w=6.8, h=5.6, pointsize=8)
-
+## quartz(w=6.8, h=5.6, pointsize=8)
+pdf("currpreg-hiv-trends_figure2.pdf", w=6.8, h=5.6, pointsize=8)
 par(oma=c(1.0, 1.5, 1, 0))
 layout(cbind(rbind(1:3, 1:3, 4:6, 4:6, 7:9, 7:9, 10:12, 10:12, c(13, 14, 14), c(13, 14, 14)), 0, rep(15:16, each=5)), w=c(1, 1, 1, 0.2, 2.2))
 par(mar=c(0.5, 1, 0.5, 0.5), cex=1, tcl=-0.25, mgp=c(2, 0.5, 0), cex.axis=0.9, las=1)
@@ -741,7 +698,7 @@ axis(2, -7:3*10, c(NA, "-60%", NA, "-40%", NA, "-20%", NA, "0%", NA, "20%", NA))
 mtext("Preg. women: age-adjusted rel. prev. change", 2, 2.5, las=3)
 legend("topleft", c("Western", "Eastern", "Southern", "All"), pch=1:4, lwd=1.5, pt.cex=1.2, lty=0, cex=0.9)
 mtext("C", 3, 1.0, font=2, cex=1.5, adj=-0.25)
-
+dev.off()
 
 
 ####################
@@ -779,8 +736,8 @@ fnPlotAgeTrend <- function(dat, ylim.val){
   return(NULL)
 }
 
-quartz(w=3.23, h=4.6, pointsize=8)
-
+## quartz(w=3.23, h=4.6, pointsize=8)
+pdf("currpreg-hiv-trends_figure3.pdf", w=3.23, h=4.6, pointsize=8)
 par(oma=c(3.5, 1.5, 1.0, 0), mfrow=c(4, 3), mar=c(0.5, 1.2, 1.5, 0.5), cex=1, tcl=-0.25, mgp=c(2, 0.5, 0), cex.axis=0.9, las=1)
 ###  Western  ###
 fnPlotAgeTrend(subset(age15to24.prev, region=="Western"), c(0, 6))
@@ -810,7 +767,6 @@ legend("bottom", c("All women 15-49 y", "Currently pregnant"), col=c(col.fem, co
 fnPlotAgeTrend(subset(age35to49.prev, region=="All"), c(0, 15))
 axis(1, 1:2, c("Per. 1", "Per. 2"), lwd.ticks=NA)
 mtext("HIV prevalence (%)", 2, 0.4, las=3, cex=1.1, outer=TRUE)
-
 dev.off()
 
 
